@@ -1,0 +1,15 @@
+进入游戏后，游戏的欢迎界面是一个纯黑色背景的简单窗口（control.cpp void control::gamestart()），大标题Emoji Alliance下方有四个矩形，使用mousemsg函数获取鼠标坐标信息，当鼠标移动到对应矩形框上时进入case WM_MOUSEMOVE，开启矩形框变红效果，鼠标按下后进入对应的case WM_LBUTTONDOWN中的if，转至对应的start/introduction/direction/exit，进入下层循环。以home为例，当按下home后，即判断玩家按下的是否为home/introduction/start，对应地，bool _HOME=,_INTRODUCTION=,_OPERATION=分别判断是否为此三个按钮，对应地，三个变量为true/false.在进入introduction/direction后，右下角会出现返回键，这与欢迎界面的实现过程相同，按下后，程序将更改_HOME _INNTRODUCTION _OPERATION的true/false值。
+
+当按下start后，_OPERTION的值为true，可以开始绘制地图。地图文件是res文件夹下的图片，在scene.cpp文件中利用loadimage函数实现，地图中的元素包括背景、地块两部分，其中背景为mapsky.bmp,其他地图块存储在map.bmp中。在人物的控制上，用control.cpp中的control::GetCommand()实现，当按下w/a/s/d/j键后，转到对应的指令，实现上下左右与发射操作。
+
+在游戏中，出现的人物、道具有敌人、金币、食物，在role.cpp中的createxxx来创建敌人。道具的创建用坐标表示，第一位为x坐标，第二位为y坐标，敌人的设置还有第三位坐标，1表示向右，2表示向左，并通过坐标*32的方式转换成像素。
+
+在人物运动的过程中，控制人物移动的方式为物理匀变速运动公式，存储在rule.cpp中。主人公可以在地图中实现两连跳的技能，此处通过设定变量jump的限制值来实现，函数为role.cpp中的void role::action。
+
+在人物运动的过程中，涉及的判断为主人公是否与敌人和道具接触。这部分的判定位于role.cpp中bool role::isTouch及其下方的Map *role::touchMap POINT *role::touchCoins POINT *role::touchFood Enemy *role::touchEnemy几个函数。在判定接触的函数中，由于主人公必须从上方撞向敌人才能判定为敌人死亡，所以在函数中添加了一段判断代码进行判断。
+
+在吃到食物后，主人公拥有技能——发射子弹，此时role.isshoot为true，子弹在空中飞后，可能飞出画面什么都没有碰到，可能打中墙也可能打中敌人，在role.cpp的void role::bullteFlying进行判断，函数中有两个if分别判断子弹是否有效、子弹是否打中敌人，打中敌人后得分+5.
+
+在主人公遇到敌人或跌落而死后，控制动画与变量的函数位于main.cpp,调用类myscene.action与myRole.action，进入if(myRole.isDied()) 判断，具体操作为停止背景音乐，播放死亡音乐，全局变量的life值-1，同时若玩家生命用尽，则播放游戏结束音乐，回到主菜单，重新绘制第一关地图。
+
+若玩家过关，则进入商店。具体操作方式为载入货架图片，绘制相关矩形你，进入死循环，更新鼠标信息，当鼠标左键按下后，判断左键按下的坐标，购买相应商品，同时全局变量score相应减少，并使用goto返回循环前，使得可以再次进入循环。当按下返回按钮时，将代码中的goto 变为break,从而跳出循环。如果通关，则播放通关动画，播放通关音乐，通关图片播放结束后，回到主菜单，可以选择开始下一次游戏。
